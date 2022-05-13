@@ -1,7 +1,7 @@
-## threejs-webpack-starter
-This is a boilerplate for a basic threejs scene, using a default webpack config
+## ics-loader test
+Test project for loading an ICS file
 
-Based on [this starter](https://github.com/taniarascia/webpack-boilerplate)
+Based on [this starter](https://github.com/anuragsr/threejs-webpack-starter)
 
 ## Author
 [Anurag Srivastava](https://www.envisagecyberart.in)
