@@ -1,6 +1,9 @@
 import $ from 'jquery'
 import * as THREE from 'three'
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls'
+// import { IFCLoader } from 'web-ifc-three/IFCLoader'
+import NProgress from 'nprogress'
+import { IFCLoader } from "three/examples/jsm/loaders/IFCLoader";
 
 import gsap from 'gsap'
 import Stats from 'stats.js'
@@ -18,7 +21,7 @@ export default class THREEStarter {
     this.camera = new THREE.PerspectiveCamera(45, this.w / this.h, 1, 10000)
 
     this.origin = new THREE.Vector3(0, 0, 0)
-    this.cameraStartPos = new THREE.Vector3(0, 500, 0)
+    this.cameraStartPos = new THREE.Vector3(0, 150, 250)
     this.controls = new OrbitControls(this.camera, this.renderer.domElement)
     
     this.axesHelper = new THREE.AxesHelper(500)
@@ -43,11 +46,9 @@ export default class THREEStarter {
     this.spotLight2 = new THREE.DirectionalLight(0xffffff, 1)
     this.lightPos2 = new THREE.Vector3(-500, 350, -500)
 
-    this.currMesh = { name: "Blank" }
-
     this.stats = new Stats()
     this.stats.showPanel(0) // 0: fps, 1: ms, 2: mb, 3+: custom
-    document.body.appendChild(this.stats.dom)
+    // document.body.appendChild(this.stats.dom)
   }
   createMesh(geometry, material, materialOptions){
     if(materialOptions) {
@@ -93,10 +94,12 @@ export default class THREEStarter {
     scene.add(spotLight2)
     
     // Initialize the scene
-    this.initGUI()
-    this.toggleHelpers(1)
+    // this.initGUI()
+    this.toggleHelpers(0)
     this.addObjects()
     this.addListeners()
+
+    NProgress.start()
   }
   initGUI() {
     const guiObj = new GUI({
@@ -130,17 +133,17 @@ export default class THREEStarter {
     }
   }
   addObjects(){
-    const { scene, createMesh } = this
-    , cylinder = createMesh(
-      new THREE.CylinderGeometry( 50, 50, 50, 32, 1, false ),
-      new THREE.MeshPhongMaterial({ side: THREE.DoubleSide, color: 0x000000 })
-    )
+    const { scene } = this
+    const ifcLoader = new IFCLoader();
+    ifcLoader.ifcManager.setWasmPath( '../assets/wasm/' );
+    ifcLoader.load(
+      "assets/models/FL_39.ifc",
+      (ifcModel) => {
+        ifcModel.mesh.scale.multiplyScalar(5)
+        scene.add(ifcModel.mesh)
 
-    cylinder.name = "Base Object"
-    cylinder.position.set(0, 25, 0)
-    scene.add(cylinder)
-
-    this.currMesh = cylinder
+        NProgress.done()
+      });
   }  
   render() {
     const { renderer, scene, camera, stats } = this
@@ -150,7 +153,7 @@ export default class THREEStarter {
       stats.end()
     } catch (err){
       l(err)
-      gsap.ticker.removeEventListener("tick", render)
+      gsap.ticker.removeEventListener("tick", this.render.bind(this))
     }
   }
   resize() {

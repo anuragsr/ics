@@ -1,5 +1,8 @@
 const MiniCssExtractPlugin = require('mini-css-extract-plugin')
 const CssMinimizerPlugin = require('css-minimizer-webpack-plugin')
+const { BaseHrefWebpackPlugin } = require('base-href-webpack-plugin')
+const HtmlWebpackPlugin = require('html-webpack-plugin')
+
 const { merge } = require('webpack-merge')
 
 const paths = require('./paths')
@@ -38,7 +41,7 @@ module.exports = merge(common, {
     new MiniCssExtractPlugin({
       filename: 'styles/[name].[contenthash].css',
       chunkFilename: '[id].css',
-    }),
+    })
   ],
   optimization: {
     minimize: true,

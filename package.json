@@ -21,6 +21,7 @@
     "@babel/plugin-proposal-class-properties": "^7.14.5",
     "@babel/preset-env": "^7.15.8",
     "babel-loader": "^8.2.2",
+    "base-href-webpack-plugin": "^3.0.1",
     "clean-webpack-plugin": "^4.0.0",
     "copy-webpack-plugin": "^9.0.1",
     "cross-env": "^7.0.3",
@@ -51,7 +52,9 @@
     "dat.gui": "^0.7.9",
     "gsap": "^3.10.4",
     "jquery": "^3.6.0",
+    "nprogress": "^0.2.0",
     "stats.js": "^0.17.0",
-    "three": "^0.140.2"
+    "three": "^0.140.2",
+    "web-ifc-three": "^0.0.115"
   }
 }

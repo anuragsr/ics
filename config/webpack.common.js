@@ -41,7 +41,7 @@ module.exports = {
     // Generates an HTML file from a template
     // Generates deprecation warning: https://github.com/jantimon/html-webpack-plugin/issues/1501
     new HtmlWebpackPlugin({
-      title: 'Three.JS + Webpack 5 Starter',
+      title: 'ICS Loader Test',
       favicon: paths.src + '/images/favicon.png',
       template: paths.src + '/template.html', // template file
       filename: 'index.html', // output file
@@ -50,6 +50,8 @@ module.exports = {
 
   // Determine how modules within the project are treated
   module: {
+    // exprContextCritical: false,
+
     rules: [
       // JavaScript: Use Babel to transpile JavaScript files
       { test: /\.js$/, use: ['babel-loader'] },
@@ -58,7 +60,10 @@ module.exports = {
       { test: /\.(?:ico|gif|png|jpg|jpeg)$/i, type: 'asset/resource' },
 
       // 3d Models: Copy 3d model files to build folder
-      { test: /\.(?:gltf|gltf2|obj|mtl|fbx|stl)$/i, type: 'asset/resource' },
+      { test: /\.(?:gltf|gltf2|obj|mtl|fbx|stl|ics)$/i, type: 'asset/resource' },
+
+      // // Wasm files
+      // { test: /\.(wasm)$/, type: 'asset/inline' },
 
       // Fonts and SVGs: Inline files
       { test: /\.(woff(2)?|eot|ttf|otf|svg|)$/, type: 'asset/inline' },
