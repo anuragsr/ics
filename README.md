@@ -1,5 +1,5 @@
-## ics-loader test
-Test project for loading an ICS file
+## ifc-loader test
+Test project for loading an IFC file
 
 Based on [this starter](https://github.com/anuragsr/threejs-webpack-starter)
 

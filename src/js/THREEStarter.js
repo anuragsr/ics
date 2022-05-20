@@ -3,7 +3,8 @@ import * as THREE from 'three'
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls'
 // import { IFCLoader } from 'web-ifc-three/IFCLoader'
 import NProgress from 'nprogress'
-import { IFCLoader } from "three/examples/jsm/loaders/IFCLoader";
+import { IFCLoader } from 'three/examples/jsm/loaders/IFCLoader'
+import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader'
 
 import gsap from 'gsap'
 import Stats from 'stats.js'
@@ -49,6 +50,10 @@ export default class THREEStarter {
     this.stats = new Stats()
     this.stats.showPanel(0) // 0: fps, 1: ms, 2: mb, 3+: custom
     // document.body.appendChild(this.stats.dom)
+
+    this.raycaster = new THREE.Raycaster()
+    this.pointer = new THREE.Vector2()
+    this.hoveredObjects = {}
   }
   createMesh(geometry, material, materialOptions){
     if(materialOptions) {
@@ -87,8 +92,8 @@ export default class THREEStarter {
     // Spotlight and representational mesh
     spotLightMesh1.position.copy(lightPos1)  
     spotLight1.position.copy(lightPos1)
-    scene.add(spotLight1)    
-    
+    scene.add(spotLight1)
+
     spotLightMesh2.position.copy(lightPos2)
     spotLight2.position.copy(lightPos2)
     scene.add(spotLight2)
@@ -104,7 +109,7 @@ export default class THREEStarter {
   initGUI() {
     const guiObj = new GUI({
       helpers: true,
-      getState: function () { l(this) },
+      getState: () => { l(this) },
     })
     , gui = guiObj.gui
     , params = guiObj.getParams()
@@ -138,22 +143,109 @@ export default class THREEStarter {
     ifcLoader.ifcManager.setWasmPath( '../assets/wasm/' );
     ifcLoader.load(
       "assets/models/FL_39.ifc",
+      // "assets/models/SmallOffice_d_IFC2x3.ifc",
       (ifcModel) => {
+        l(ifcModel)
         ifcModel.mesh.scale.multiplyScalar(5)
-        scene.add(ifcModel.mesh)
+        ifcModel.mesh.position.z+=100
+        // scene.add(ifcModel.mesh)
 
+        // NProgress.done()
+      });
+
+    const gltfLoader = new GLTFLoader();
+    // ifcLoader.ifcManager.setWasmPath( '../assets/wasm/' );
+    gltfLoader.load(
+      "assets/models/floorplan.glb",
+      (gltf) => {
+        // l(gltf)
+        const floors = []
+        const spaces = []
+        const sc = gltf.scene
+        sc.scale.multiplyScalar(5)
+        // sc.position.z-=100
+        scene.add(sc)
+
+        sc.children.forEach(o => {
+
+          // if(o.material) o.material.transparent = true
+
+          if(o.name.includes("Space_")) {
+            // l(o)
+            o.material.color = new THREE.Color(.3, .4, .1)
+            o.material.origColor = new THREE.Color(.3, .4, .1)
+            o.material.opacity = .8
+            // o.position.y+=10
+            spaces.push(o)
+          } else if(o.name.includes("Floor_")) {
+            // l(o)
+            o.material.color = new THREE.Color(.3, .6, 1)
+            o.material.opacity = .8
+            // o.position.y-=10
+            floors.push(o)
+          } else {
+            // if(o.material) o.material.opacity = 0
+          }
+        })
+
+        l(spaces, floors)
         NProgress.done()
       });
   }  
   render() {
-    const { renderer, scene, camera, stats } = this
+    const { renderer, scene, camera, stats, raycaster, pointer, hoveredObjects } = this
     try{
       stats.begin()
+
+      // update the picking ray with the camera and pointer position
+      raycaster.setFromCamera( pointer, camera );
+      raycaster.layers.set(0);
+      // calculate objects intersecting the picking ray
+      // const intersects = [raycaster.intersectObjects( scene.children, true )[0]];
+      let intersects = raycaster.intersectObjects( scene.children, true );
+
+      intersects = intersects.filter(int => {
+       return int.object.name.includes("Space_")
+      })
+
+      if(intersects.length){
+        intersects = [intersects[0]]
+      }
+
+      // collect array of uuids of currently hovered objects
+      var hoveredObjectUuids = intersects.map(el => el.object.uuid);
+
+      for (let i = 0; i < intersects.length; i++) {
+        var hoveredObj = intersects[i].object;
+        if (hoveredObjects[hoveredObj.uuid]) {
+          continue; // this object was hovered and still hovered
+        }
+
+        if(intersects[ i ].object.material.color)
+          intersects[ i ].object.material.color.set( 0xff0000 );
+
+        // collect hovered object
+        hoveredObjects[hoveredObj.uuid] = hoveredObj;
+      }
+
+      for (let uuid of Object.keys(hoveredObjects)) {
+        let idx = hoveredObjectUuids.indexOf(uuid);
+        if (idx === -1) {
+          // object with given uuid was unhovered
+          let unhoveredObj = hoveredObjects[uuid];
+          delete hoveredObjects[uuid];
+
+          if(unhoveredObj.material.color)
+            // unhoveredObj.material.color.set( 0x00ff00 );
+            unhoveredObj.material.color.set( unhoveredObj.material.origColor );
+        }
+      }
+
       renderer.render(scene, camera)
       stats.end()
     } catch (err){
       l(err)
-      gsap.ticker.removeEventListener("tick", this.render.bind(this))
+      gsap.ticker.remove(this.render.bind(this))
     }
   }
   resize() {
@@ -168,8 +260,16 @@ export default class THREEStarter {
   
     renderer.setSize(w, h)
   }
+  onPointerMove( event ){
+    // calculate pointer position in normalized device coordinates
+    // (-1 to +1) for both components
+
+    this.pointer.x = ( event.clientX / window.innerWidth ) * 2 - 1;
+    this.pointer.y = - ( event.clientY / window.innerHeight ) * 2 + 1;
+  }
   addListeners(){
     gsap.ticker.add(this.render.bind(this))
-    window.addEventListener("resize", this.resize.bind(this), false)
+    window.addEventListener('resize', this.resize.bind(this), false)
+    window.addEventListener('pointermove', this.onPointerMove.bind(this), false)
   }
 }
