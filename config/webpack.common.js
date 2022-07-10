@@ -50,6 +50,8 @@ module.exports = {
 
   // Determine how modules within the project are treated
   module: {
+    exprContextCritical: false,
+
     rules: [
       // JavaScript: Use Babel to transpile JavaScript files
       { test: /\.js$/, use: ['babel-loader'] },
@@ -58,7 +60,7 @@ module.exports = {
       { test: /\.(?:ico|gif|png|jpg|jpeg)$/i, type: 'asset/resource' },
 
       // 3d Models: Copy 3d model files to build folder
-      { test: /\.(?:gltf|gltf2|obj|mtl|fbx|stl|ics)$/i, type: 'asset/resource' },
+      { test: /\.(?:gltf|gltf2|obj|mtl|fbx|stl|ifc)$/i, type: 'asset/resource' },
 
       // // Wasm files
       // { test: /\.(wasm)$/, type: 'asset/inline' },

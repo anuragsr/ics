@@ -24,7 +24,7 @@ export default class THREEStarter {
     this.origin = new THREE.Vector3(0, 0, 0)
     this.cameraStartPos = new THREE.Vector3(0, 150, 250)
     this.controls = new OrbitControls(this.camera, this.renderer.domElement)
-    
+
     this.axesHelper = new THREE.AxesHelper(500)
     this.axesHelper.material.opacity = .5
     this.axesHelper.material.transparent = true
@@ -66,7 +66,7 @@ export default class THREEStarter {
     return new THREE.Mesh(geometry, material)
   }
   init(){
-    const { 
+    const {
       ctn, w, h,
       camera, scene, renderer,
       cameraStartPos, origin, floor,
@@ -86,11 +86,11 @@ export default class THREEStarter {
     // Cameras and ambient light
     camera.position.copy(cameraStartPos)
     camera.lookAt(origin)
-    scene.add(camera)    
+    scene.add(camera)
     scene.add(new THREE.AmbientLight(0xffffff, .2))
 
     // Spotlight and representational mesh
-    spotLightMesh1.position.copy(lightPos1)  
+    spotLightMesh1.position.copy(lightPos1)
     spotLight1.position.copy(lightPos1)
     scene.add(spotLight1)
 
@@ -148,7 +148,7 @@ export default class THREEStarter {
         l(ifcModel)
         ifcModel.mesh.scale.multiplyScalar(5)
         ifcModel.mesh.position.z+=100
-        // scene.add(ifcModel.mesh)
+        scene.add(ifcModel.mesh)
 
         // NProgress.done()
       });
@@ -163,7 +163,7 @@ export default class THREEStarter {
         const spaces = []
         const sc = gltf.scene
         sc.scale.multiplyScalar(5)
-        // sc.position.z-=100
+        sc.position.z-=100
         scene.add(sc)
 
         sc.children.forEach(o => {
@@ -191,7 +191,7 @@ export default class THREEStarter {
         l(spaces, floors)
         NProgress.done()
       });
-  }  
+  }
   render() {
     const { renderer, scene, camera, stats, raycaster, pointer, hoveredObjects } = this
     try{
